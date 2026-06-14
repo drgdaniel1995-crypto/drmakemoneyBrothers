@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>InvestIA · Cadastro de Consultores</title>
+<style>
+:root{
+  --navy:#07101f;--navy2:#0d1829;--navy3:#162035;--navy4:#1e2d47;
+  --gold:#c9a84c;--gold2:#e3c06a;--gold3:#f0d898;
+  --silver:#8899b0;--light:#cdd8e8;--white:#f0f4fa;
+  --green:#2ecc71;--red:#e74c3c;
+  --border:rgba(201,168,76,0.18);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--navy);color:var(--white);min-height:100vh;}
+canvas#bg{position:fixed;inset:0;z-index:0;pointer-events:none;}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:50;background:rgba(7,16,31,.92);
+  backdrop-filter:blur(20px);border-bottom:1px solid var(--border);
+  padding:16px 48px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{font-family:Georgia,serif;font-size:22px;color:var(--gold2);text-decoration:none;}
+.nav-back{font-size:13px;color:var(--silver);text-decoration:none;
+  display:flex;align-items:center;gap:6px;transition:color .2s;}
+.nav-back:hover{color:var(--gold2);}
+
+/* HERO */
+.hero{text-align:center;padding:80px 24px 56px;position:relative;z-index:1;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;
+  background:rgba(201,168,76,0.09);border:1px solid var(--border);
+  padding:5px 16px;border-radius:100px;font-size:11px;color:var(--gold2);
+  letter-spacing:.1em;text-transform:uppercase;font-weight:500;margin-bottom:24px;}
+.hero h1{font-family:Georgia,serif;font-size:clamp(32px,4vw,52px);
+  line-height:1.1;margin-bottom:16px;}
+.hero h1 span{color:var(--gold);}
+.hero p{font-size:16px;color:var(--silver);max-width:540px;margin:0 auto 48px;line-height:1.7;}
+
+/* BENEFITS ROW */
+.benefits{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;
+  max-width:900px;margin:0 auto 64px;padding:0 24px;}
+.benefit{background:rgba(255,255,255,.03);border:1px solid var(--border);
+  border-radius:14px;padding:20px 24px;text-align:center;flex:1;min-width:200px;max-width:260px;
+  transition:border-color .2s,transform .2s;}
+.benefit:hover{border-color:rgba(201,168,76,.4);transform:translateY(-3px);}
+.benefit-icon{font-size:28px;margin-bottom:10px;}
+.benefit h3{font-size:14px;font-weight:600;color:var(--white);margin-bottom:6px;}
+.benefit p{font-size:12.5px;color:var(--silver);line-height:1.6;}
+
+/* FORM SECTION */
+.form-section{max-width:680px;margin:0 auto;padding:0 24px 80px;position:relative;z-index:1;}
+.fcard{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:20px;
+  padding:44px 48px;backdrop-filter:blur(20px);
+  box-shadow:0 30px 70px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.05);
+  position:relative;overflow:hidden;}
+.fcard::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.fcard-title{font-family:Georgia,serif;font-size:24px;margin-bottom:6px;}
+.fcard-sub{font-size:13px;color:var(--silver);margin-bottom:32px;}
+.section-label{font-size:11px;font-weight:600;color:var(--gold2);
+  letter-spacing:.1em;text-transform:uppercase;margin:24px 0 16px;
+  display:flex;align-items:center;gap:10px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--silver);
+  letter-spacing:.06em;text-transform:uppercase;margin-bottom:7px;}
+.field input,.field select,.field textarea{
+  width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:10px;padding:13px 15px;font-size:14px;color:var(--white);
+  font-family:'Segoe UI',system-ui,sans-serif;outline:none;transition:border-color .2s,box-shadow .2s;}
+.field textarea{resize:vertical;min-height:90px;line-height:1.5;}
+.field select option{background:var(--navy2);}
+.field input::placeholder,.field textarea::placeholder{color:rgba(255,255,255,.28);}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.1);}
+.field input.err,.field select.err,.field textarea.err{border-color:var(--red);}
+.ferr{font-size:11px;color:var(--red);margin-top:4px;display:none;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.certs-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.cert-pill{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  border-radius:8px;padding:7px 13px;font-size:12.5px;color:var(--silver);cursor:pointer;
+  transition:all .2s;user-select:none;}
+.cert-pill.sel{background:rgba(201,168,76,.12);border-color:var(--gold);color:var(--gold2);}
+.specs-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.spec-pill{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  border-radius:8px;padding:7px 13px;font-size:12.5px;color:var(--silver);cursor:pointer;
+  transition:all .2s;user-select:none;}
+.spec-pill.sel{background:rgba(46,204,113,.1);border-color:var(--green);color:var(--green);}
+.terms{display:flex;align-items:flex-start;gap:10px;margin:20px 0 28px;
+  font-size:12.5px;color:var(--silver);line-height:1.6;}
+.terms input[type=checkbox]{width:16px;height:16px;margin-top:2px;accent-color:var(--gold);flex-shrink:0;}
+.cta{width:100%;padding:15px;border-radius:10px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--gold),var(--gold2) 50%,var(--gold));
+  background-size:200% auto;font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;font-weight:600;
+  color:var(--navy);transition:background-position .4s,box-shadow .2s,transform .15s;
+  box-shadow:0 4px 22px rgba(201,168,76,.28);}
+.cta:hover{background-position:right center;box-shadow:0 6px 30px rgba(201,168,76,.42);}
+.cta:active{transform:scale(.98);}
+.cta:disabled{opacity:.5;cursor:default;}
+
+/* SUCCESS */
+#successState{display:none;text-align:center;padding:20px 0;}
+#successState .big-check{font-size:64px;margin-bottom:16px;}
+#successState h2{font-family:Georgia,serif;font-size:26px;color:var(--gold2);margin-bottom:10px;}
+#successState p{font-size:14px;color:var(--silver);line-height:1.7;max-width:400px;margin:0 auto 28px;}
+
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.fcard{animation:fadeIn .5s ease;}
+
+@media(max-width:600px){
+  nav{padding:14px 20px;}
+  .fcard{padding:28px 22px;}
+  .row2{grid-template-columns:1fr;}
+  .hero{padding:60px 20px 36px;}
+}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+
+<nav>
+  <a class="nav-logo" href="index.html">InvestIA</a>
+  <a class="nav-back" href="index.html">← Voltar ao site</a>
+</nav>
+
+<div class="hero" style="position:relative;z-index:1;">
+  <div class="hero-badge">Para Consultores Independentes</div>
+  <h1>Receba <span>leads qualificados</span><br/>de investidores reais</h1>
+  <p>Cadastre-se gratuitamente e apareça para investidores que já analisaram seus ativos com IA e estão prontos para uma consultoria.</p>
+</div>
+
+<div class="benefits">
+  <div class="benefit">
+    <div class="benefit-icon">🎯</div>
+    <h3>Leads aquecidos</h3>
+    <p>Investidores que já analisaram seus investimentos e buscam orientação especializada</p>
+  </div>
+  <div class="benefit">
+    <div class="benefit-icon">✅</div>
+    <h3>Selo verificado</h3>
+    <p>Sua certificação CVM/ANBIMA é exibida e valida sua credibilidade na plataforma</p>
+  </div>
+  <div class="benefit">
+    <div class="benefit-icon">📊</div>
+    <h3>Match por especialidade</h3>
+    <p>Você aparece somente para investidores com perfil e ativos alinhados à sua área</p>
+  </div>
+</div>
+
+<div class="form-section">
+  <div class="fcard">
+    <div id="formState">
+      <h2 class="fcard-title">Cadastro de Consultor</h2>
+      <p class="fcard-sub">Preencha seus dados profissionais para análise e aprovação</p>
+
+      <div class="section-label">Dados pessoais</div>
+      <div class="row2">
+        <div class="field"><label>Nome completo *</label>
+          <input type="text" id="c-name" placeholder="Ana Beatriz Costa"/>
+          <div class="ferr">Campo obrigatório.</div></div>
+        <div class="field"><label>CPF *</label>
+          <input type="text" id="c-cpf" placeholder="000.000.000-00" maxlength="14"/>
+          <div class="ferr">CPF inválido.</div></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>E-mail profissional *</label>
+          <input type="email" id="c-email" placeholder="ana@consultoria.com.br"/>
+          <div class="ferr">E-mail inválido.</div></div>
+        <div class="field"><label>WhatsApp *</label>
+          <input type="tel" id="c-phone" placeholder="(11) 99999-9999"/>
+          <div class="ferr">Telefone inválido.</div></div>
+      </div>
+      <div class="field"><label>Cidade / Estado *</label>
+        <input type="text" id="c-region" placeholder="São Paulo · SP"/>
+        <div class="ferr">Campo obrigatório.</div></div>
+
+      <div class="section-label">Certificações</div>
+      <div class="field"><label>Selecione suas certificações *</label>
+        <div class="certs-grid" id="certs-grid">
+          <div class="cert-pill" onclick="togglePill(this,'certs')">CFP®</div>
+          <div class="cert-pill" onclick="togglePill(this,'certs')">CEA®</div>
+          <div class="cert-pill" onclick="togglePill(this,'certs')">CGA®</div>
+          <div class="cert-pill" onclick="togglePill(this,'certs')">CNPI®</div>
+          <div class="cert-pill" onclick="togglePill(this,'certs')">CPA-10</div>
+          <div class="cert-pill" onclick="togglePill(this,'certs')">CPA-20</div>
+          <div class="cert-pill" onclick="togglePill(this,'certs')">AAI (XP)</div>
+          <div class="cert-pill" onclick="togglePill(this,'certs')">ANCORD</div>
+        </div>
+        <div id="certs-err" style="font-size:11px;color:var(--red);margin-top:6px;display:none;">Selecione ao menos uma.</div>
+      </div>
+      <div class="field"><label>Número de registro CVM (opcional)</label>
+        <input type="text" id="c-cvm" placeholder="CVM-XXXXXXXX"/></div>
+
+      <div class="section-label">Especialidades</div>
+      <div class="field"><label>Áreas de atuação *</label>
+        <div class="specs-grid" id="specs-grid">
+          <div class="spec-pill" onclick="togglePill(this,'specs')">Renda Fixa</div>
+          <div class="spec-pill" onclick="togglePill(this,'specs')">Renda Variável</div>
+          <div class="spec-pill" onclick="togglePill(this,'specs')">Fundos Imobiliários</div>
+          <div class="spec-pill" onclick="togglePill(this,'specs')">Previdência</div>
+          <div class="spec-pill" onclick="togglePill(this,'specs')">Planejamento Patrimonial</div>
+          <div class="spec-pill" onclick="togglePill(this,'specs')">Fundos Multimercado</div>
+          <div class="spec-pill" onclick="togglePill(this,'specs')">BDRs e Mercado Global</div>
+          <div class="spec-pill" onclick="togglePill(this,'specs')">Criptoativos</div>
+          <div class="spec-pill" onclick="togglePill(this,'specs')">Análise Técnica</div>
+          <div class="spec-pill" onclick="togglePill(this,'specs')">Sucessão Familiar</div>
+        </div>
+        <div id="specs-err" style="font-size:11px;color:var(--red);margin-top:6px;display:none;">Selecione ao menos uma.</div>
+      </div>
+
+      <div class="section-label">Sobre você</div>
+      <div class="field"><label>Mini bio profissional *</label>
+        <textarea id="c-bio" placeholder="Descreva sua experiência, abordagem e diferenciais em 2-4 linhas…"></textarea>
+        <div class="ferr">Campo obrigatório.</div></div>
+      <div class="row2">
+        <div class="field"><label>Anos de experiência</label>
+          <select id="c-exp">
+            <option value="">Selecione…</option>
+            <option>Menos de 2 anos</option>
+            <option>2–5 anos</option>
+            <option>5–10 anos</option>
+            <option>Mais de 10 anos</option>
+          </select></div>
+        <div class="field"><label>Perfil predominante de cliente</label>
+          <select id="c-profile">
+            <option value="">Selecione…</option>
+            <option>Iniciante / conservador</option>
+            <option>Intermediário / moderado</option>
+            <option>Avançado / arrojado</option>
+            <option>Todos os perfis</option>
+          </select></div>
+      </div>
+      <div class="field"><label>LinkedIn (opcional)</label>
+        <input type="url" id="c-linkedin" placeholder="https://linkedin.com/in/seu-perfil"/></div>
+
+      <div class="terms">
+        <input type="checkbox" id="c-terms"/>
+        <label for="c-terms">Confirmo que possuo as certificações indicadas, estou devidamente registrado junto à CVM/ANBIMA e concordo com os <a href="#" style="color:var(--gold2)">Termos de Uso</a> e a <a href="#" style="color:var(--gold2)">Política de Privacidade</a> da InvestIA.</label>
+      </div>
+
+      <button class="cta" id="submitBtn" onclick="submitForm()">Enviar cadastro para análise →</button>
+      <p style="font-size:11px;color:var(--silver);text-align:center;margin-top:14px;opacity:.6;">
+        Seu cadastro será analisado em até 48h. Você receberá confirmação por e-mail.
+      </p>
+    </div>
+
+    <div id="successState">
+      <div class="big-check">🎉</div>
+      <h2>Cadastro enviado!</h2>
+      <p>Recebemos suas informações. Nossa equipe irá verificar suas certificações e ativar seu perfil em até <strong style="color:var(--gold2)">48 horas úteis</strong>.<br/><br/>Fique de olho no seu e-mail.</p>
+      <a href="index.html"><button class="cta" style="max-width:220px;margin:0 auto;">← Voltar ao site</button></a>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPA_URL='https://uxkqfiypizyaqanwmsyt.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV4a3FmaXlwaXp5YXFhbndtc3l0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNjg5MjUsImV4cCI6MjA5Njk0NDkyNX0.baZkmN0LksceTdtvWs3l_ULKv5MahrPRxW3bMr2j8lc';
+const supabase=window.SupabaseLite?window.SupabaseLite.createClient(SUPA_URL,SUPA_KEY):null;
+
+// Starfield
+(()=>{const c=document.getElementById('bg'),ctx=c.getContext('2d');let W,H,pts=[];
+  const r=()=>{W=c.width=innerWidth;H=c.height=innerHeight;};r();addEventListener('resize',r);
+  for(let i=0;i<50;i++) pts.push({x:Math.random()*3000,y:Math.random()*3000,
+    r:Math.random()*1.2+.2,vx:(Math.random()-.5)*.1,vy:(Math.random()-.5)*.1,o:Math.random()*.3+.04});
+  const d=()=>{ctx.clearRect(0,0,W,H);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(201,168,76,${p.o})`;ctx.fill();});requestAnimationFrame(d);};d();})();
+
+// Pills toggle
+function togglePill(el,group){el.classList.toggle('sel');}
+function getSelected(gridId){
+  return [...document.querySelectorAll(`#${gridId} .sel`)].map(el=>el.textContent).join(', ');
+}
+
+// CPF mask
+document.getElementById('c-cpf').addEventListener('input',function(){
+  let v=this.value.replace(/\D/g,'').slice(0,11);
+  if(v.length>9) v=`${v.slice(0,3)}.${v.slice(3,6)}.${v.slice(6,9)}-${v.slice(9)}`;
+  else if(v.length>6) v=`${v.slice(0,3)}.${v.slice(3,6)}.${v.slice(6)}`;
+  else if(v.length>3) v=`${v.slice(0,3)}.${v.slice(3)}`;
+  this.value=v;
+});
+
+// Phone mask
+document.getElementById('c-phone').addEventListener('input',function(){
+  let v=this.value.replace(/\D/g,'').slice(0,11);
+  if(v.length>6) v=`(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
+  else if(v.length>2) v=`(${v.slice(0,2)}) ${v.slice(2)}`;
+  else if(v.length) v=`(${v}`;
+  this.value=v;
+});
+
+const vEmail=e=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+const vPhone=p=>p.replace(/\D/g,'').length>=10;
+const vCPF=c=>c.replace(/\D/g,'').length===11;
+
+async function submitForm(){
+  let ok=true;
+  const chk=(id,cond)=>{const el=document.getElementById(id);el.classList.toggle('err',!cond);
+    const err=el.parentElement.querySelector('.ferr');if(err)err.style.display=cond?'none':'block';
+    if(!cond)ok=false;};
+
+  chk('c-name',document.getElementById('c-name').value.trim().length>2);
+  chk('c-cpf',vCPF(document.getElementById('c-cpf').value));
+  chk('c-email',vEmail(document.getElementById('c-email').value));
+  chk('c-phone',vPhone(document.getElementById('c-phone').value));
+  chk('c-region',document.getElementById('c-region').value.trim().length>2);
+  chk('c-bio',document.getElementById('c-bio').value.trim().length>20);
+
+  const certs=getSelected('certs-grid');
+  const specs=getSelected('specs-grid');
+  document.getElementById('certs-err').style.display=certs?'none':'block';
+  document.getElementById('specs-err').style.display=specs?'none':'block';
+  if(!certs||!specs)ok=false;
+
+  if(!document.getElementById('c-terms').checked){
+    alert('Você precisa aceitar os Termos de Uso para continuar.');ok=false;
+  }
+  if(!ok)return;
+
+  const btn=document.getElementById('submitBtn');
+  btn.disabled=true;btn.textContent='Enviando…';
+
+  const payload={
+    name:document.getElementById('c-name').value.trim(),
+    cpf:document.getElementById('c-cpf').value,
+    email:document.getElementById('c-email').value.trim(),
+    whatsapp:document.getElementById('c-phone').value,
+    region:document.getElementById('c-region').value.trim(),
+    cert:certs,spec:specs,
+    bio:document.getElementById('c-bio').value.trim(),
+    exp:document.getElementById('c-exp').value,
+    profile:document.getElementById('c-profile').value,
+    linkedin:document.getElementById('c-linkedin').value.trim(),
+    cvm:document.getElementById('c-cvm').value.trim(),
+    aprovado:false,
+    avatar:'👤',
+    created_at:new Date().toISOString()
+  };
+
+  try{
+    if(supabase&&!SUPA_URL.includes('SEU_PROJETO')){
+      const{error}=await supabase.from('consultores').insert(payload);
+      if(error)throw error;
+    }
+    // Show success
+    document.getElementById('formState').style.display='none';
+    document.getElementById('successState').style.display='block';
+  }catch(e){
+    alert('Erro ao enviar. Verifique sua conexão e tente novamente.\n'+e.message);
+    btn.disabled=false;btn.textContent='Enviar cadastro para análise →';
+  }
+}
+</script>
+</body>
+</html>

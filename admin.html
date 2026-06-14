@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>InvestIA · Painel Admin</title>
+<style>
+:root{
+  --navy:#07101f;--navy2:#0d1829;--navy3:#162035;--navy4:#1e2d47;
+  --gold:#c9a84c;--gold2:#e3c06a;--gold3:#f0d898;
+  --silver:#8899b0;--light:#cdd8e8;--white:#f0f4fa;
+  --green:#2ecc71;--red:#e74c3c;--blue:#3b82f6;--orange:#f59e0b;--purple:#a78bfa;
+  --border:rgba(201,168,76,0.15);--card:rgba(255,255,255,0.03);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--navy);color:var(--white);min-height:100vh;display:flex;}
+
+/* ── SIDEBAR ── */
+.sidebar{width:232px;background:var(--navy2);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;flex-shrink:0;min-height:100vh;position:relative;z-index:10;}
+.sidebar-logo{padding:22px 20px;border-bottom:1px solid var(--border);}
+.sidebar-logo .logo{font-family:Georgia,serif;font-size:20px;color:var(--gold2);text-decoration:none;display:block;}
+.sidebar-logo p{font-size:11px;color:var(--silver);margin-top:2px;}
+.sidebar-nav{padding:14px 10px;flex:1;}
+.snav-section{font-size:10px;color:var(--silver);opacity:.5;text-transform:uppercase;
+  letter-spacing:.1em;padding:8px 10px 4px;margin-top:8px;}
+.snav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;
+  cursor:pointer;font-size:13px;color:var(--silver);transition:all .2s;margin-bottom:2px;
+  position:relative;}
+.snav-item:hover{background:rgba(201,168,76,.06);color:var(--light);}
+.snav-item.active{background:rgba(201,168,76,.1);color:var(--gold2);border-left:3px solid var(--gold);}
+.snav-icon{font-size:15px;width:20px;text-align:center;}
+.snav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;
+  padding:1px 6px;border-radius:10px;min-width:18px;text-align:center;}
+.sidebar-footer{padding:14px 20px;border-top:1px solid var(--border);}
+.sidebar-footer a{font-size:12px;color:var(--silver);text-decoration:none;transition:color .2s;display:block;margin-bottom:6px;}
+.sidebar-footer a:hover{color:var(--gold2);}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.topbar{background:var(--navy2);border-bottom:1px solid var(--border);
+  padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar h1{font-family:Georgia,serif;font-size:19px;}
+.topbar-r{display:flex;align-items:center;gap:10px;}
+.admin-badge{background:rgba(201,168,76,.1);border:1px solid var(--border);
+  padding:5px 12px;border-radius:100px;font-size:11.5px;color:var(--gold2);}
+.logout-btn{background:none;border:1px solid var(--border);border-radius:8px;
+  color:var(--silver);font-size:12px;padding:5px 11px;cursor:pointer;
+  font-family:'Segoe UI',system-ui,sans-serif;transition:all .2s;}
+.logout-btn:hover{border-color:var(--red);color:var(--red);}
+
+.content{flex:1;overflow-y:auto;padding:24px;}
+.content::-webkit-scrollbar{width:3px;}
+.content::-webkit-scrollbar-thumb{background:rgba(201,168,76,.2);border-radius:2px;}
+
+/* ── LOGIN ── */
+#loginScreen{position:fixed;inset:0;z-index:200;background:var(--navy);
+  display:flex;align-items:center;justify-content:center;}
+.login-card{background:rgba(255,255,255,.03);border:1px solid var(--border);
+  border-radius:18px;padding:42px 38px;max-width:370px;width:100%;
+  box-shadow:0 30px 70px rgba(0,0,0,.5);position:relative;}
+.login-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.login-logo{font-family:Georgia,serif;font-size:26px;color:var(--gold2);text-align:center;margin-bottom:4px;}
+.login-sub{font-size:13px;color:var(--silver);text-align:center;margin-bottom:26px;}
+.lf{margin-bottom:14px;}
+.lf label{font-size:11px;font-weight:600;color:var(--silver);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;}
+.lf input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  border-radius:9px;padding:12px 14px;font-size:14px;color:var(--white);
+  font-family:'Segoe UI',system-ui,sans-serif;outline:none;transition:border-color .2s;}
+.lf input:focus{border-color:var(--gold);}
+.lcta{width:100%;padding:13px;border-radius:9px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;font-weight:600;color:var(--navy);
+  margin-top:6px;transition:opacity .2s;}
+.lcta:hover{opacity:.88;}
+#lerr{font-size:12px;color:var(--red);text-align:center;margin-top:10px;display:none;}
+
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:18px 20px;
+  position:relative;overflow:hidden;transition:border-color .2s;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat-card.gold::before{background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.stat-card.green::before{background:var(--green);}
+.stat-card.blue::before{background:var(--blue);}
+.stat-card.purple::before{background:var(--purple);}
+.stat-label{font-size:11px;color:var(--silver);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;}
+.stat-val{font-family:Georgia,serif;font-size:30px;font-weight:600;}
+.stat-card.gold .stat-val{color:var(--gold2);}
+.stat-card.green .stat-val{color:var(--green);}
+.stat-card.blue .stat-val{color:var(--blue);}
+.stat-card.purple .stat-val{color:var(--purple);}
+.stat-sub{font-size:11px;color:var(--silver);margin-top:4px;}
+
+/* ── TABLE ── */
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.section-hdr-left h2{font-family:Georgia,serif;font-size:17px;}
+.section-hdr-left p{font-size:12px;color:var(--silver);margin-top:2px;}
+.hdr-btns{display:flex;gap:8px;}
+.hbtn{padding:7px 14px;border-radius:8px;border:1px solid var(--border);
+  background:none;color:var(--silver);font-size:12px;cursor:pointer;
+  font-family:'Segoe UI',system-ui,sans-serif;transition:all .2s;display:flex;align-items:center;gap:5px;}
+.hbtn:hover{border-color:var(--gold);color:var(--gold2);}
+.hbtn.primary{background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--navy);border-color:transparent;font-weight:600;}
+.hbtn.primary:hover{opacity:.88;}
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:13px;overflow:hidden;margin-bottom:28px;}
+.table-head{background:rgba(201,168,76,.05);border-bottom:1px solid var(--border);
+  padding:11px 18px;display:grid;gap:10px;font-size:10.5px;font-weight:600;
+  color:var(--silver);text-transform:uppercase;letter-spacing:.06em;align-items:center;}
+.trow{padding:13px 18px;display:grid;gap:10px;border-bottom:1px solid rgba(255,255,255,.03);
+  align-items:center;transition:background .15s;cursor:pointer;}
+.trow:hover{background:rgba(201,168,76,.03);}
+.trow:last-child{border-bottom:none;}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:6px;font-size:11px;font-weight:600;white-space:nowrap;}
+.badge.novo{background:rgba(59,130,246,.12);color:var(--blue);}
+.badge.contato{background:rgba(245,158,11,.12);color:var(--orange);}
+.badge.qualificado{background:rgba(167,139,250,.12);color:var(--purple);}
+.badge.reuniao{background:rgba(201,168,76,.12);color:var(--gold2);}
+.badge.convertido{background:rgba(46,204,113,.1);color:var(--green);}
+.badge.perdido{background:rgba(231,76,60,.08);color:var(--red);}
+.badge.pending{background:rgba(245,158,11,.12);color:var(--orange);}
+.badge.approved{background:rgba(46,204,113,.1);color:var(--green);}
+.abtn{padding:5px 10px;border-radius:6px;border:none;cursor:pointer;
+  font-family:'Segoe UI',system-ui,sans-serif;font-size:11.5px;font-weight:600;transition:opacity .2s;}
+.abtn:hover{opacity:.8;}
+.abtn.approve{background:rgba(46,204,113,.15);color:var(--green);border:1px solid rgba(46,204,113,.3);}
+.abtn.reject{background:rgba(231,76,60,.1);color:var(--red);border:1px solid rgba(231,76,60,.25);}
+.abtn.view{background:rgba(201,168,76,.1);color:var(--gold2);border:1px solid var(--border);}
+.abtn.remove{background:rgba(231,76,60,.08);color:var(--red);border:1px solid rgba(231,76,60,.2);}
+.action-btns{display:flex;gap:5px;flex-wrap:wrap;}
+.empty-state{padding:38px;text-align:center;color:var(--silver);font-size:13.5px;}
+.empty-state span{display:block;font-size:32px;margin-bottom:8px;}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:3px;background:rgba(255,255,255,.03);border:1px solid var(--border);
+  border-radius:10px;padding:4px;width:fit-content;margin-bottom:20px;}
+.tab{padding:7px 16px;border-radius:7px;cursor:pointer;font-size:12.5px;
+  color:var(--silver);transition:all .2s;}
+.tab.active{background:rgba(201,168,76,.12);color:var(--gold2);font-weight:500;}
+
+/* ── SEARCH BAR ── */
+.search-row{display:flex;gap:10px;margin-bottom:16px;align-items:center;}
+.search-input{background:rgba(255,255,255,.05);border:1px solid var(--border);
+  border-radius:9px;padding:9px 14px;font-size:13px;color:var(--white);
+  font-family:'Segoe UI',system-ui,sans-serif;outline:none;transition:border-color .2s;flex:1;}
+.search-input:focus{border-color:var(--gold);}
+.search-input::placeholder{color:rgba(255,255,255,.3);}
+.filter-select{background:rgba(255,255,255,.05);border:1px solid var(--border);
+  border-radius:9px;padding:9px 12px;font-size:12.5px;color:var(--white);
+  font-family:'Segoe UI',system-ui,sans-serif;outline:none;cursor:pointer;}
+.filter-select option{background:var(--navy2);}
+
+/* ── CRM KANBAN ── */
+.kanban-wrap{display:flex;gap:14px;overflow-x:auto;padding-bottom:12px;min-height:400px;}
+.kanban-wrap::-webkit-scrollbar{height:4px;}
+.kanban-wrap::-webkit-scrollbar-thumb{background:rgba(201,168,76,.2);border-radius:2px;}
+.kanban-col{flex-shrink:0;width:220px;display:flex;flex-direction:column;gap:8px;}
+.kanban-header{padding:10px 14px;border-radius:9px 9px 0 0;display:flex;align-items:center;justify-content:space-between;
+  font-size:12px;font-weight:600;letter-spacing:.04em;}
+.kanban-header .count{background:rgba(255,255,255,.15);padding:2px 7px;border-radius:10px;font-size:11px;}
+.kh-novo{background:rgba(59,130,246,.15);color:#93c5fd;}
+.kh-contato{background:rgba(245,158,11,.15);color:#fcd34d;}
+.kh-qualificado{background:rgba(167,139,250,.15);color:#c4b5fd;}
+.kh-reuniao{background:rgba(201,168,76,.15);color:var(--gold2);}
+.kh-convertido{background:rgba(46,204,113,.12);color:#6ee7b7;}
+.kh-perdido{background:rgba(231,76,60,.1);color:#fca5a5;}
+.kanban-cards{display:flex;flex-direction:column;gap:7px;flex:1;}
+.kcard{background:var(--navy3);border:1px solid var(--border);border-radius:9px;
+  padding:11px 13px;cursor:pointer;transition:border-color .2s,transform .15s;
+  animation:slideUp .25s ease;}
+.kcard:hover{border-color:rgba(201,168,76,.35);transform:translateY(-1px);}
+.kcard-name{font-size:13px;font-weight:600;color:var(--white);margin-bottom:3px;}
+.kcard-email{font-size:11px;color:var(--silver);margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.kcard-phone{font-size:11px;color:var(--light);}
+.kcard-date{font-size:10px;color:var(--silver);margin-top:6px;opacity:.7;}
+.kcard-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.ktag{font-size:10px;padding:2px 7px;border-radius:5px;background:rgba(255,255,255,.06);color:var(--silver);}
+
+/* ── CLIENT DETAIL PANEL ── */
+.detail-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.65);
+  backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:flex-end;
+  animation:fadeIn .25s;}
+.detail-panel{background:var(--navy2);border-left:1px solid var(--border);
+  width:460px;max-width:100%;height:100%;overflow-y:auto;
+  display:flex;flex-direction:column;animation:slideRight .3s ease;}
+.detail-panel::-webkit-scrollbar{width:3px;}
+.detail-panel::-webkit-scrollbar-thumb{background:rgba(201,168,76,.2);border-radius:2px;}
+.dpanel-head{padding:20px 24px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+  background:var(--navy3);position:sticky;top:0;z-index:2;}
+.dpanel-head h3{font-family:Georgia,serif;font-size:17px;}
+.dclose{background:none;border:none;color:var(--silver);font-size:20px;cursor:pointer;transition:color .2s;}
+.dclose:hover{color:var(--white);}
+.dpanel-body{padding:22px 24px;flex:1;}
+.dp-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--navy4));
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  border:2px solid var(--gold);margin-bottom:14px;}
+.dp-name{font-family:Georgia,serif;font-size:20px;margin-bottom:4px;}
+.dp-meta{font-size:12.5px;color:var(--silver);margin-bottom:16px;}
+.dp-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+.dp-info-item{background:rgba(255,255,255,.03);border:1px solid var(--border);
+  border-radius:9px;padding:11px 13px;}
+.dp-info-label{font-size:10px;color:var(--silver);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.dp-info-val{font-size:13px;color:var(--white);font-weight:500;}
+.dp-info-val a{color:var(--gold2);text-decoration:none;}
+.dp-section{font-size:11px;font-weight:600;color:var(--gold2);text-transform:uppercase;
+  letter-spacing:.07em;margin:18px 0 10px;display:flex;align-items:center;gap:8px;}
+.dp-section::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* Status selector */
+.status-selector{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+.sstatus{padding:6px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.08);
+  font-size:12px;cursor:pointer;transition:all .2s;background:rgba(255,255,255,.03);}
+.sstatus:hover{border-color:rgba(255,255,255,.2);}
+.sstatus.active-novo{background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.4);color:#93c5fd;}
+.sstatus.active-contato{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.4);color:#fcd34d;}
+.sstatus.active-qualificado{background:rgba(167,139,250,.15);border-color:rgba(167,139,250,.4);color:#c4b5fd;}
+.sstatus.active-reuniao{background:rgba(201,168,76,.15);border-color:rgba(201,168,76,.4);color:var(--gold2);}
+.sstatus.active-convertido{background:rgba(46,204,113,.12);border-color:rgba(46,204,113,.4);color:#6ee7b7;}
+.sstatus.active-perdido{background:rgba(231,76,60,.1);border-color:rgba(231,76,60,.35);color:#fca5a5;}
+
+/* Notes */
+.notes-area{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);
+  border-radius:9px;padding:12px 14px;font-size:13px;color:var(--white);
+  font-family:'Segoe UI',system-ui,sans-serif;outline:none;resize:vertical;min-height:80px;
+  line-height:1.5;transition:border-color .2s;}
+.notes-area:focus{border-color:var(--gold);}
+.notes-area::placeholder{color:rgba(255,255,255,.28);}
+.save-note-btn{margin-top:8px;padding:8px 16px;background:rgba(201,168,76,.12);
+  border:1px solid var(--border);border-radius:8px;color:var(--gold2);
+  font-size:12.5px;font-weight:600;cursor:pointer;font-family:'Segoe UI',system-ui,sans-serif;
+  transition:all .2s;}
+.save-note-btn:hover{background:rgba(201,168,76,.2);}
+
+/* Timeline */
+.timeline{display:flex;flex-direction:column;gap:10px;}
+.tl-item{display:flex;gap:12px;align-items:flex-start;}
+.tl-dot{width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:12px;
+  background:rgba(255,255,255,.05);border:1px solid var(--border);margin-top:1px;}
+.tl-content{flex:1;}
+.tl-text{font-size:12.5px;color:var(--light);line-height:1.5;}
+.tl-date{font-size:10.5px;color:var(--silver);margin-top:2px;}
+
+/* Assign consultant */
+.assign-select{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);
+  border-radius:9px;padding:10px 13px;font-size:13px;color:var(--white);
+  font-family:'Segoe UI',system-ui,sans-serif;outline:none;margin-bottom:8px;cursor:pointer;}
+.assign-select option{background:var(--navy2);}
+.assign-btn{padding:8px 16px;background:linear-gradient(135deg,var(--gold),var(--gold2));
+  border:none;border-radius:8px;color:var(--navy);font-size:12.5px;font-weight:600;
+  cursor:pointer;font-family:'Segoe UI',system-ui,sans-serif;transition:opacity .2s;}
+.assign-btn:hover{opacity:.88;}
+
+/* quick actions */
+.quick-actions{display:flex;gap:8px;margin-top:8px;}
+.qbtn{flex:1;padding:9px;border-radius:8px;border:1px solid var(--border);
+  background:rgba(255,255,255,.03);color:var(--silver);font-size:12px;
+  cursor:pointer;font-family:'Segoe UI',system-ui,sans-serif;transition:all .2s;text-align:center;}
+.qbtn:hover{border-color:var(--gold);color:var(--gold2);}
+
+/* ── MODAL GENERIC ── */
+.modal-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.72);
+  backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;
+  padding:20px;animation:fadeIn .25s;}
+.modal{background:var(--navy2);border:1px solid var(--border);border-radius:18px;
+  padding:32px;max-width:440px;width:100%;position:relative;
+  box-shadow:0 32px 80px rgba(0,0,0,.6);}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.modal h3{font-family:Georgia,serif;font-size:20px;margin-bottom:6px;}
+.modal p{font-size:13px;color:var(--silver);margin-bottom:20px;line-height:1.6;}
+.mclose{position:absolute;top:14px;right:16px;background:none;border:none;
+  color:var(--silver);font-size:18px;cursor:pointer;}
+.mfield{margin-bottom:14px;}
+.mfield label{font-size:11px;color:var(--gold2);text-transform:uppercase;letter-spacing:.06em;
+  font-weight:600;display:block;margin-bottom:6px;}
+.mfield input,.mfield select,.mfield textarea{
+  width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  border-radius:9px;padding:11px 13px;font-size:13.5px;color:var(--white);
+  font-family:'Segoe UI',system-ui,sans-serif;outline:none;transition:border-color .2s;}
+.mfield input:focus,.mfield select:focus,.mfield textarea:focus{border-color:var(--gold);}
+.mfield select option{background:var(--navy2);}
+.mfield textarea{resize:vertical;min-height:70px;}
+.macts{display:flex;gap:9px;margin-top:20px;}
+.mcancel{flex:1;background:none;border:1px solid var(--border);border-radius:9px;
+  color:var(--silver);padding:11px;cursor:pointer;font-family:'Segoe UI',system-ui,sans-serif;
+  font-size:13.5px;transition:border-color .2s;}
+.mcancel:hover{border-color:var(--silver);}
+.mconfirm{flex:2;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;
+  border-radius:9px;color:var(--navy);padding:11px;cursor:pointer;
+  font-family:'Segoe UI',system-ui,sans-serif;font-size:13.5px;font-weight:600;transition:opacity .2s;}
+.mconfirm:hover{opacity:.88;}
+
+@keyframes slideUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@keyframes slideRight{from{transform:translateX(40px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+@media(max-width:900px){
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .detail-panel{width:100%;}
+}
+@media(max-width:640px){
+  .sidebar{width:190px;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">InvestIA</div>
+    <div class="login-sub">Painel Administrativo</div>
+    <div class="lf"><label>E-mail admin</label>
+      <input type="email" id="la" placeholder="admin@investia.com.br" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <div class="lf"><label>Senha</label>
+      <input type="password" id="lp" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <button class="lcta" onclick="doLogin()">Entrar no painel →</button>
+    <div id="lerr" class="lerr" style="font-size:12px;color:var(--red);text-align:center;margin-top:10px;display:none;">Credenciais inválidas.</div>
+  </div>
+</div>
+
+<!-- ══ SIDEBAR ══ -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <a class="logo" href="index.html">InvestIA</a>
+    <p>Painel Admin</p>
+  </div>
+  <div class="sidebar-nav">
+    <div class="snav-section">Visão geral</div>
+    <div class="snav-item active" onclick="showPage('dashboard',this)">
+      <span class="snav-icon">📊</span> Dashboard
+    </div>
+    <div class="snav-section">CRM</div>
+    <div class="snav-item" onclick="showPage('crm',this)">
+      <span class="snav-icon">👥</span> Clientes
+      <span class="snav-badge" id="crm-badge" style="display:none">0</span>
+    </div>
+    <div class="snav-item" onclick="showPage('kanban',this)">
+      <span class="snav-icon">🗂️</span> Pipeline
+    </div>
+    <div class="snav-section">Plataforma</div>
+    <div class="snav-item" onclick="showPage('consultores',this)">
+      <span class="snav-icon">🎓</span> Consultores
+      <span class="snav-badge" id="consul-badge" style="display:none">0</span>
+    </div>
+    <div class="snav-item" onclick="showPage('leads',this)">
+      <span class="snav-icon">📋</span> Leads
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    <a href="index.html">← Site público</a>
+    <a href="consultores.html">Cadastro consultores</a>
+    <button class="logout-btn" style="margin-top:4px;width:100%" onclick="doLogout()">Sair</button>
+  </div>
+</div>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+  <div class="topbar">
+    <h1 id="pageTitle">Dashboard</h1>
+    <div class="topbar-r">
+      <div class="admin-badge">🔐 Admin</div>
+      <button class="hbtn primary" id="topActionBtn" onclick="openAddClient()" style="display:none">+ Novo cliente</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── DASHBOARD ── -->
+    <div id="page-dashboard">
+      <div class="stats-row">
+        <div class="stat-card gold">
+          <div class="stat-label">Total de clientes</div>
+          <div class="stat-val" id="st-clients">–</div>
+          <div class="stat-sub">cadastrados no CRM</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Convertidos</div>
+          <div class="stat-val" id="st-conv">–</div>
+          <div class="stat-sub">clientes ativos</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-label">Leads recebidos</div>
+          <div class="stat-val" id="st-leads">–</div>
+          <div class="stat-sub">solicitações de contato</div>
+        </div>
+        <div class="stat-card purple">
+          <div class="stat-label">Consultores ativos</div>
+          <div class="stat-val" id="st-consul">–</div>
+          <div class="stat-sub">aprovados na plataforma</div>
+        </div>
+      </div>
+
+      <div class="section-hdr">
+        <div class="section-hdr-left"><h2>Clientes recentes</h2><p>Últimas entradas no CRM</p></div>
+        <div class="hdr-btns"><button class="hbtn" onclick="showPage('crm',document.querySelector('[onclick*=crm]'))">Ver todos →</button></div>
+      </div>
+      <div class="table-wrap" id="dash-clients-table"><div class="empty-state"><span>⏳</span>Carregando…</div></div>
+
+      <div class="section-hdr" style="margin-top:8px">
+        <div class="section-hdr-left"><h2>Consultores pendentes</h2><p>Aguardando verificação</p></div>
+      </div>
+      <div class="table-wrap" id="dash-pending-table"><div class="empty-state"><span>⏳</span>Carregando…</div></div>
+    </div>
+
+    <!-- ── CRM LISTA ── -->
+    <div id="page-crm" style="display:none">
+      <div class="section-hdr">
+        <div class="section-hdr-left"><h2>Clientes CRM</h2><p>Todos os contatos recebidos via site</p></div>
+        <div class="hdr-btns">
+          <button class="hbtn" onclick="exportCSV()">⬇ Exportar CSV</button>
+          <button class="hbtn primary" onclick="openAddClient()">+ Novo cliente</button>
+        </div>
+      </div>
+      <div class="search-row">
+        <input class="search-input" id="crm-search" placeholder="🔍  Buscar por nome, e-mail ou telefone…" oninput="renderCRM()"/>
+        <select class="filter-select" id="crm-filter-status" onchange="renderCRM()">
+          <option value="">Todos os status</option>
+          <option value="novo">🔵 Novo</option>
+          <option value="contato">🟡 Em contato</option>
+          <option value="qualificado">🟣 Qualificado</option>
+          <option value="reuniao">🟤 Reunião</option>
+          <option value="convertido">🟢 Convertido</option>
+          <option value="perdido">🔴 Perdido</option>
+        </select>
+      </div>
+      <div class="table-wrap" id="crm-table"><div class="empty-state"><span>⏳</span>Carregando…</div></div>
+    </div>
+
+    <!-- ── KANBAN ── -->
+    <div id="page-kanban" style="display:none">
+      <div class="section-hdr">
+        <div class="section-hdr-left"><h2>Pipeline de Clientes</h2><p>Clique em um card para editar</p></div>
+      </div>
+      <div class="kanban-wrap" id="kanban-board"></div>
+    </div>
+
+    <!-- ── CONSULTORES ── -->
+    <div id="page-consultores" style="display:none">
+      <div class="section-hdr">
+        <div class="section-hdr-left"><h2>Consultores</h2><p>Gerencie os consultores da plataforma</p></div>
+      </div>
+      <div class="tabs">
+        <div class="tab active" onclick="filterConsul('pendente',this)">⏳ Pendentes</div>
+        <div class="tab" onclick="filterConsul('aprovado',this)">✅ Aprovados</div>
+        <div class="tab" onclick="filterConsul('todos',this)">Todos</div>
+      </div>
+      <div class="table-wrap" id="consul-table"><div class="empty-state"><span>⏳</span>Carregando…</div></div>
+    </div>
+
+    <!-- ── LEADS ── -->
+    <div id="page-leads" style="display:none">
+      <div class="section-hdr">
+        <div class="section-hdr-left"><h2>Leads</h2><p>Investidores que solicitaram contato com consultores</p></div>
+        <div class="hdr-btns"><button class="hbtn" onclick="exportLeadsCSV()">⬇ Exportar CSV</button></div>
+      </div>
+      <div class="table-wrap" id="leads-table"><div class="empty-state"><span>⏳</span>Carregando…</div></div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ══ DETAIL PANEL ══ -->
+<div id="detailOverlay" class="detail-overlay" style="display:none" onclick="if(event.target===this)closeDetail()">
+  <div class="detail-panel" id="detailPanel"></div>
+</div>
+
+<!-- ══ ADD CLIENT MODAL ══ -->
+<div id="addClientModal" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <button class="mclose" onclick="closeAddClient()">✕</button>
+    <h3>Novo Cliente</h3>
+    <p>Adicione um cliente manualmente ao CRM.</p>
+    <div class="mfield"><label>Nome completo *</label>
+      <input type="text" id="ac-name" placeholder="João Silva"/></div>
+    <div class="mfield"><label>E-mail *</label>
+      <input type="email" id="ac-email" placeholder="joao@email.com"/></div>
+    <div class="mfield"><label>Telefone *</label>
+      <input type="tel" id="ac-phone" placeholder="(11) 99999-9999"/></div>
+    <div class="mfield"><label>Origem</label>
+      <select id="ac-source">
+        <option value="site">Site / IA</option>
+        <option value="indicacao">Indicação</option>
+        <option value="manual">Cadastro manual</option>
+        <option value="outro">Outro</option>
+      </select></div>
+    <div class="mfield"><label>Observação inicial</label>
+      <textarea id="ac-note" placeholder="Contexto, interesse, como chegou…"></textarea></div>
+    <div class="macts">
+      <button class="mcancel" onclick="closeAddClient()">Cancelar</button>
+      <button class="mconfirm" onclick="saveNewClient()">Salvar cliente →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+window.SupabaseLite=(function(){
+  function createClient(url,key){
+    function h(){return{'Content-Type':'application/json','apikey':key,'Authorization':'Bearer '+key};}
+    function from(table){
+      return{
+        insert:async function(data){try{const r=await fetch(url+'/rest/v1/'+table,{method:'POST',headers:{...h(),'Prefer':'return=minimal'},body:JSON.stringify(data)});return{error:r.ok?null:{message:r.status}};}catch(e){return{error:{message:e.message}};}},
+        select:function(cols){return{eq:function(col,val){return{maybeSingle:async function(){try{const r=await fetch(url+'/rest/v1/'+table+'?select='+(cols||'*')+'&'+col+'=eq.'+encodeURIComponent(val)+'&limit=1',{headers:h()});const d=await r.json();return{data:d&&d.length?d[0]:null,error:null};}catch(e){return{data:null,error:{message:e.message}};}}};},limit:function(){return{};}}},
+        update:async function(data){return this;},
+        delete:async function(){return{error:null};},
+        eq:function(){return this;},
+        order:function(){return this;}
+      };
+    }
+    return{from};
+  }
+  return{createClient};
+})();
+</script>
+<script>
+// ══ CONFIG ═══════════════════════════════════════════════════════════════
+const SUPA_URL = 'https://uxkqfiypizyaqanwmsyt.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV4a3FmaXlwaXp5YXFhbndtc3l0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNjg5MjUsImV4cCI6MjA5Njk0NDkyNX0.baZkmN0LksceTdtvWs3l_ULKv5MahrPRxW3bMr2j8lc';
+const ADMIN_EMAIL = 'drgdaniel1995@gmail.com';
+const ADMIN_PASS  = 'Brothers94$tfl1000';
+const sb = window.supabase ? window.supabase.createClient(SUPA_URL, SUPA_KEY) : null;
+const useSupa = () => sb && !SUPA_URL.includes('SEU_PROJETO');
+
+// ══ DEMO DATA ════════════════════════════════════════════════════════════
+let allClients = [
+  {id:1,nome:'João Pedro Silva',email:'joao@email.com',telefone:'(11) 98888-0001',origem:'site',status:'novo',notas:'Perguntou sobre FIIs e Tesouro Direto.',consultor_id:null,created_at:'2025-06-05T10:00:00Z',historico:[{evento:'Cadastro no site',data:'2025-06-05T10:00:00Z',icon:'🌐'}]},
+  {id:2,nome:'Maria Clara Souza',email:'mclara@email.com',telefone:'(21) 97777-0002',origem:'site',status:'contato',notas:'Interessada em renda variável. Preferência manhã.',consultor_id:2,created_at:'2025-06-04T14:30:00Z',historico:[{evento:'Cadastro no site',data:'2025-06-04T14:30:00Z',icon:'🌐'},{evento:'Primeiro contato realizado',data:'2025-06-05T09:00:00Z',icon:'📞'}]},
+  {id:3,nome:'Carlos Eduardo Lima',email:'carlosedu@email.com',telefone:'(31) 96666-0003',origem:'indicacao',status:'qualificado',notas:'Perfil moderado. Quer diversificar carteira.',consultor_id:1,created_at:'2025-06-03T11:00:00Z',historico:[{evento:'Indicado por consultor',data:'2025-06-03T11:00:00Z',icon:'🤝'},{evento:'Qualificado pelo time',data:'2025-06-04T16:00:00Z',icon:'✅'}]},
+  {id:4,nome:'Ana Beatriz Moraes',email:'ana.bmoraes@email.com',telefone:'(11) 95555-0004',origem:'site',status:'convertido',notas:'Assinou plano premium. Foco em previdência.',consultor_id:1,created_at:'2025-06-01T09:00:00Z',historico:[{evento:'Cadastro no site',data:'2025-06-01T09:00:00Z',icon:'🌐'},{evento:'Reunião realizada',data:'2025-06-02T15:00:00Z',icon:'📅'},{evento:'Convertido — plano premium',data:'2025-06-03T10:00:00Z',icon:'🎉'}]},
+  {id:5,nome:'Rafael Mendes',email:'rmendes@email.com',telefone:'(85) 94444-0005',origem:'site',status:'perdido',notas:'Não retornou contato após 3 tentativas.',consultor_id:null,created_at:'2025-05-30T08:00:00Z',historico:[{evento:'Cadastro no site',data:'2025-05-30T08:00:00Z',icon:'🌐'},{evento:'Sem retorno — marcado como perdido',data:'2025-06-04T17:00:00Z',icon:'❌'}]},
+];
+let allConsul = [
+  {id:1,name:'Ana Beatriz Costa',email:'ana@consultoria.com.br',whatsapp:'11999990001',region:'São Paulo · SP',cert:'CFP®, CGA®',spec:'Renda Variável, FIIs',aprovado:true,created_at:'2025-06-01T09:00:00Z'},
+  {id:2,name:'Carlos Eduardo Lima',email:'carlos@invest.com',whatsapp:'21999990002',region:'Rio de Janeiro · RJ',cert:'CEA®, CFP®',spec:'Renda Fixa, Previdência',aprovado:false,created_at:'2025-06-04T11:00:00Z'},
+  {id:3,name:'Fernanda Matos',email:'fer@analise.com',whatsapp:'31999990003',region:'BH · MG',cert:'CFP®, CNPI®',spec:'Ações, Análise Técnica',aprovado:false,created_at:'2025-06-05T14:00:00Z'},
+];
+let allLeads = [
+  {id:1,nome:'João Pedro Silva',email:'joao@email.com',telefone:'(11) 98888-0001',horario:'Tarde (12h–18h)',tema:'FIIs',consultor_id:1,created_at:'2025-06-05T15:00:00Z'},
+  {id:2,nome:'Maria Clara Souza',email:'mclara@email.com',telefone:'(21) 97777-0002',horario:'Manhã (8h–12h)',tema:'Renda variável',consultor_id:2,created_at:'2025-06-05T16:30:00Z'},
+];
+
+let consulFilter = 'pendente';
+let activeClient = null;
+const STATUSES = ['novo','contato','qualificado','reuniao','convertido','perdido'];
+const STATUS_LABELS = {novo:'Novo',contato:'Em contato',qualificado:'Qualificado',reuniao:'Reunião',convertido:'Convertido',perdido:'Perdido'};
+const STATUS_ICONS  = {novo:'🔵',contato:'🟡',qualificado:'🟣',reuniao:'🟤',convertido:'🟢',perdido:'🔴'};
+
+// ══ AUTH ════════════════════════════════════════════════════════════════
+function doLogin(){
+  const e=document.getElementById('la').value.trim();
+  const p=document.getElementById('lp').value;
+  if(e===ADMIN_EMAIL&&p===ADMIN_PASS){
+    document.getElementById('loginScreen').style.display='none';
+    loadAll();
+  } else { document.getElementById('lerr').style.display='block'; }
+}
+function doLogout(){ document.getElementById('loginScreen').style.display='flex'; }
+
+// ══ LOAD ════════════════════════════════════════════════════════════════
+async function loadAll(){
+  if(useSupa()){
+    const [rc,rl,rco] = await Promise.all([
+      sb.from('clientes_crm').select('*').order('created_at',{ascending:false}),
+      sb.from('leads').select('*').order('created_at',{ascending:false}),
+      sb.from('consultores').select('*').order('created_at',{ascending:false}),
+    ]);
+    if(rc.data) allClients=rc.data;
+    if(rl.data) allLeads=rl.data;
+    if(rco.data) allConsul=rco.data;
+  }
+  updateBadges();
+  renderDashboard();renderCRM();renderKanban();renderConsul();renderLeads();
+}
+
+function updateBadges(){
+  const pending=allConsul.filter(c=>!c.aprovado).length;
+  const cbadge=document.getElementById('consul-badge');
+  cbadge.textContent=pending;cbadge.style.display=pending?'block':'none';
+  document.getElementById('crm-badge').textContent=allClients.length;
+  document.getElementById('crm-badge').style.display='block';
+}
+
+// ══ NAVIGATION ══════════════════════════════════════════════════════════
+const PAGES = {dashboard:'Dashboard',crm:'Clientes CRM',kanban:'Pipeline',consultores:'Consultores',leads:'Leads'};
+function showPage(name,el){
+  Object.keys(PAGES).forEach(k=>{ document.getElementById('page-'+k).style.display=k===name?'block':'none'; });
+  document.querySelectorAll('.snav-item').forEach(i=>i.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.getElementById('pageTitle').textContent=PAGES[name];
+  document.getElementById('topActionBtn').style.display=name==='crm'?'flex':'none';
+  closeDetail();
+}
+
+// ══ DASHBOARD ═══════════════════════════════════════════════════════════
+function renderDashboard(){
+  document.getElementById('st-clients').textContent=allClients.length;
+  document.getElementById('st-conv').textContent=allClients.filter(c=>c.status==='convertido').length;
+  document.getElementById('st-leads').textContent=allLeads.length;
+  document.getElementById('st-consul').textContent=allConsul.filter(c=>c.aprovado).length;
+
+  // Recent clients
+  const cols='170px 1fr 130px 100px 110px';
+  const recent=allClients.slice(0,5);
+  document.getElementById('dash-clients-table').innerHTML=recent.length?
+    `<div class="table-head" style="grid-template-columns:${cols}"><span>Nome</span><span>E-mail</span><span>Telefone</span><span>Status</span><span>Origem</span></div>`+
+    recent.map(c=>clientRow(c,cols)).join('')
+    :`<div class="empty-state"><span>👥</span>Nenhum cliente ainda</div>`;
+
+  // Pending consultores
+  const pending=allConsul.filter(c=>!c.aprovado).slice(0,4);
+  const pcols='180px 1fr 130px 140px';
+  document.getElementById('dash-pending-table').innerHTML=pending.length?
+    `<div class="table-head" style="grid-template-columns:${pcols}"><span>Nome</span><span>Especialidades</span><span>Região</span><span>Ações</span></div>`+
+    pending.map(c=>`<div class="trow" style="grid-template-columns:${pcols}">
+      <span style="font-size:13px;font-weight:500">${c.name}</span>
+      <span style="font-size:12px;color:var(--silver)">${c.spec}</span>
+      <span style="font-size:12px;color:var(--silver)">${c.region}</span>
+      <div class="action-btns">
+        <button class="abtn approve" onclick="approveConsul(${c.id});event.stopPropagation()">✓ Aprovar</button>
+        <button class="abtn reject" onclick="removeConsul(${c.id});event.stopPropagation()">Recusar</button>
+      </div></div>`).join('')
+    :`<div class="empty-state"><span>✅</span>Nenhum pendente</div>`;
+}
+
+// ══ CRM TABLE ═══════════════════════════════════════════════════════════
+function renderCRM(){
+  const q=document.getElementById('crm-search')?.value.toLowerCase()||'';
+  const fs=document.getElementById('crm-filter-status')?.value||'';
+  let list=allClients.filter(c=>{
+    const match=!q||(c.nome||'').toLowerCase().includes(q)||(c.email||'').toLowerCase().includes(q)||(c.telefone||'').includes(q);
+    const status=!fs||c.status===fs;
+    return match&&status;
+  });
+  const cols='170px 1fr 130px 110px 90px 120px';
+  document.getElementById('crm-table').innerHTML=list.length?
+    `<div class="table-head" style="grid-template-columns:${cols}"><span>Nome</span><span>E-mail</span><span>Telefone</span><span>Status</span><span>Origem</span><span>Data</span></div>`+
+    list.map(c=>clientRow(c,cols,true)).join('')
+    :`<div class="empty-state"><span>🔍</span>Nenhum cliente encontrado</div>`;
+}
+
+function clientRow(c,cols,showDate=false){
+  const date=new Date(c.created_at).toLocaleDateString('pt-BR');
+  return `<div class="trow" style="grid-template-columns:${cols}" onclick="openClient(${c.id})">
+    <div>
+      <div style="font-size:13px;font-weight:600">${c.nome}</div>
+    </div>
+    <span style="font-size:12px;color:var(--silver);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.email}</span>
+    <span style="font-size:12px;color:var(--light)">${c.telefone}</span>
+    <span><span class="badge ${c.status}">${STATUS_ICONS[c.status]||''} ${STATUS_LABELS[c.status]||c.status}</span></span>
+    <span style="font-size:11.5px;color:var(--silver);text-transform:capitalize">${c.origem||'–'}</span>
+    ${showDate?`<span style="font-size:11.5px;color:var(--silver)">${date}</span>`:''}
+  </div>`;
+}
+
+// ══ KANBAN ══════════════════════════════════════════════════════════════
+const KANBAN_COLS = [
+  {key:'novo',label:'🔵 Novo',cls:'kh-novo'},
+  {key:'contato',label:'🟡 Em Contato',cls:'kh-contato'},
+  {key:'qualificado',label:'🟣 Qualificado',cls:'kh-qualificado'},
+  {key:'reuniao',label:'🟤 Reunião',cls:'kh-reuniao'},
+  {key:'convertido',label:'🟢 Convertido',cls:'kh-convertido'},
+  {key:'perdido',label:'🔴 Perdido',cls:'kh-perdido'},
+];
+
+function renderKanban(){
+  const board=document.getElementById('kanban-board');
+  board.innerHTML=KANBAN_COLS.map(col=>{
+    const cards=allClients.filter(c=>c.status===col.key);
+    return `<div class="kanban-col">
+      <div class="kanban-header ${col.cls}">
+        <span>${col.label}</span>
+        <span class="count">${cards.length}</span>
+      </div>
+      <div class="kanban-cards">
+        ${cards.length?cards.map(c=>`
+          <div class="kcard" onclick="openClient(${c.id})">
+            <div class="kcard-name">${c.nome}</div>
+            <div class="kcard-email">${c.email}</div>
+            <div class="kcard-phone">📱 ${c.telefone}</div>
+            ${c.origem?`<div class="kcard-tags"><span class="ktag">${c.origem}</span></div>`:''}
+            <div class="kcard-date">${new Date(c.created_at).toLocaleDateString('pt-BR')}</div>
+          </div>`).join('')
+        :`<div style="padding:16px;text-align:center;font-size:11.5px;color:var(--silver);opacity:.6">Vazio</div>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══ CLIENT DETAIL PANEL ═════════════════════════════════════════════════
+function openClient(id){
+  activeClient=allClients.find(c=>c.id===id);
+  if(!activeClient)return;
+  renderDetailPanel();
+  document.getElementById('detailOverlay').style.display='flex';
+}
+
+function renderDetailPanel(){
+  const c=activeClient;
+  const consulName=allConsul.find(x=>x.id===c.consultor_id)?.name||'Nenhum';
+  const initials=c.nome.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+
+  const statusBtns=STATUSES.map(s=>`
+    <div class="sstatus ${c.status===s?'active-'+s:''}" onclick="setStatus(${c.id},'${s}')"
+      style="color:${c.status===s?'':'var(--silver)'}">
+      ${STATUS_ICONS[s]} ${STATUS_LABELS[s]}
+    </div>`).join('');
+
+  const timeline=(c.historico||[]).slice().reverse().map(h=>`
+    <div class="tl-item">
+      <div class="tl-dot">${h.icon||'•'}</div>
+      <div class="tl-content">
+        <div class="tl-text">${h.evento}</div>
+        <div class="tl-date">${new Date(h.data).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+    </div>`).join('');
+
+  const consulOptions=allConsul.filter(x=>x.aprovado).map(x=>`<option value="${x.id}" ${c.consultor_id===x.id?'selected':''}>${x.name}</option>`).join('');
+
+  document.getElementById('detailPanel').innerHTML=`
+    <div class="dpanel-head">
+      <h3>Ficha do Cliente</h3>
+      <button class="dclose" onclick="closeDetail()">✕</button>
+    </div>
+    <div class="dpanel-body">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+        <div class="dp-avatar">${initials}</div>
+        <div>
+          <div class="dp-name">${c.nome}</div>
+          <div class="dp-meta">${STATUS_ICONS[c.status]} ${STATUS_LABELS[c.status]} · desde ${new Date(c.created_at).toLocaleDateString('pt-BR')}</div>
+        </div>
+      </div>
+
+      <div class="dp-info-grid">
+        <div class="dp-info-item">
+          <div class="dp-info-label">E-mail</div>
+          <div class="dp-info-val"><a href="mailto:${c.email}">${c.email}</a></div>
+        </div>
+        <div class="dp-info-item">
+          <div class="dp-info-label">Telefone</div>
+          <div class="dp-info-val"><a href="tel:${c.telefone}">${c.telefone}</a></div>
+        </div>
+        <div class="dp-info-item">
+          <div class="dp-info-label">Origem</div>
+          <div class="dp-info-val" style="text-transform:capitalize">${c.origem||'–'}</div>
+        </div>
+        <div class="dp-info-item">
+          <div class="dp-info-label">Consultor</div>
+          <div class="dp-info-val">${consulName}</div>
+        </div>
+      </div>
+
+      <div class="dp-section">Status do funil</div>
+      <div class="status-selector">${statusBtns}</div>
+
+      <div class="quick-actions">
+        <button class="qbtn" onclick="window.open('mailto:${c.email}')">✉️ E-mail</button>
+        <button class="qbtn" onclick="window.open('https://wa.me/55${c.telefone.replace(/\D/g,'')}')">💬 WhatsApp</button>
+        <button class="qbtn" onclick="window.open('tel:${c.telefone}')">📞 Ligar</button>
+      </div>
+
+      <div class="dp-section">Atribuir consultor</div>
+      <select class="assign-select" id="assign-sel">
+        <option value="">— Sem consultor —</option>
+        ${consulOptions}
+      </select>
+      <button class="assign-btn" onclick="assignConsul(${c.id})">Atribuir →</button>
+
+      <div class="dp-section">Anotações</div>
+      <textarea class="notes-area" id="client-notes" placeholder="Registre observações, interesses, próximos passos…">${c.notas||''}</textarea>
+      <button class="save-note-btn" onclick="saveNote(${c.id})">💾 Salvar anotação</button>
+
+      <div class="dp-section">Histórico</div>
+      <div class="timeline">${timeline||'<div style="font-size:12px;color:var(--silver)">Sem histórico.</div>'}</div>
+
+      <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border);display:flex;gap:8px;">
+        <button class="abtn remove" style="flex:1;padding:9px" onclick="removeClient(${c.id})">🗑 Remover cliente</button>
+      </div>
+    </div>`;
+}
+
+function closeDetail(){
+  document.getElementById('detailOverlay').style.display='none';
+  activeClient=null;
+}
+
+async function setStatus(id,status){
+  const c=allClients.find(x=>x.id===id);if(!c)return;
+  const prev=c.status;c.status=status;
+  c.historico=c.historico||[];
+  c.historico.push({evento:`Status alterado: ${STATUS_LABELS[prev]} → ${STATUS_LABELS[status]}`,data:new Date().toISOString(),icon:'🔄'});
+  if(useSupa()) await sb.from('clientes_crm').update({status,historico:c.historico}).eq('id',id);
+  renderDetailPanel();renderCRM();renderKanban();renderDashboard();
+}
+
+async function saveNote(id){
+  const c=allClients.find(x=>x.id===id);if(!c)return;
+  const notas=document.getElementById('client-notes').value;
+  c.notas=notas;
+  c.historico=c.historico||[];
+  c.historico.push({evento:'Anotação salva',data:new Date().toISOString(),icon:'📝'});
+  if(useSupa()) await sb.from('clientes_crm').update({notas,historico:c.historico}).eq('id',id);
+  renderDetailPanel();
+}
+
+async function assignConsul(id){
+  const c=allClients.find(x=>x.id===id);if(!c)return;
+  const sel=document.getElementById('assign-sel');
+  const cid=sel.value?parseInt(sel.value):null;
+  const cname=allConsul.find(x=>x.id===cid)?.name||'Nenhum';
+  c.consultor_id=cid;
+  c.historico=c.historico||[];
+  c.historico.push({evento:`Consultor atribuído: ${cname}`,data:new Date().toISOString(),icon:'🤝'});
+  if(useSupa()) await sb.from('clientes_crm').update({consultor_id:cid,historico:c.historico}).eq('id',id);
+  renderDetailPanel();renderCRM();
+}
+
+async function removeClient(id){
+  if(!confirm('Remover este cliente do CRM?'))return;
+  allClients=allClients.filter(c=>c.id!==id);
+  if(useSupa()) await sb.from('clientes_crm').delete().eq('id',id);
+  closeDetail();renderCRM();renderKanban();renderDashboard();updateBadges();
+}
+
+// ══ ADD CLIENT ═══════════════════════════════════════════════════════════
+function openAddClient(){ document.getElementById('addClientModal').style.display='flex'; }
+function closeAddClient(){ document.getElementById('addClientModal').style.display='none'; }
+
+async function saveNewClient(){
+  const nome=document.getElementById('ac-name').value.trim();
+  const email=document.getElementById('ac-email').value.trim();
+  const telefone=document.getElementById('ac-phone').value.trim();
+  if(!nome||!email||!telefone){alert('Preencha nome, e-mail e telefone.');return;}
+  const newC={
+    id:Date.now(),nome,email,telefone,
+    origem:document.getElementById('ac-source').value,
+    status:'novo',notas:document.getElementById('ac-note').value.trim(),
+    consultor_id:null,created_at:new Date().toISOString(),
+    historico:[{evento:'Cadastrado manualmente',data:new Date().toISOString(),icon:'✏️'}]
+  };
+  if(useSupa()){
+    const{data}=await sb.from('clientes_crm').insert({...newC,id:undefined}).select().single();
+    if(data) newC.id=data.id;
+  }
+  allClients.unshift(newC);
+  closeAddClient();renderCRM();renderKanban();renderDashboard();updateBadges();
+  ['ac-name','ac-email','ac-phone','ac-note'].forEach(id=>document.getElementById(id).value='');
+}
+
+// ══ EXPORT CSV ═══════════════════════════════════════════════════════════
+function exportCSV(){
+  const rows=[['Nome','E-mail','Telefone','Status','Origem','Consultor','Data cadastro','Notas']];
+  allClients.forEach(c=>{
+    const cn=allConsul.find(x=>x.id===c.consultor_id)?.name||'';
+    rows.push([c.nome,c.email,c.telefone,STATUS_LABELS[c.status]||c.status,c.origem||'',cn,
+      new Date(c.created_at).toLocaleString('pt-BR'),(c.notas||'').replace(/[\r\n]+/g,' ')]);
+  });
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`clientes_investia_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+}
+
+function exportLeadsCSV(){
+  const rows=[['Nome','E-mail','Telefone','Horário','Tema','Data']];
+  allLeads.forEach(l=>rows.push([l.nome,l.email,l.telefone,l.horario,l.tema||'',new Date(l.created_at).toLocaleString('pt-BR')]));
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`leads_investia_${new Date().toISOString().slice(0,10)}.csv`;a.click();
+}
+
+// ══ CONSULTORES ══════════════════════════════════════════════════════════
+function filterConsul(f,el){
+  consulFilter=f;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');renderConsul();
+}
+function renderConsul(){
+  let list=allConsul;
+  if(consulFilter==='pendente') list=allConsul.filter(c=>!c.aprovado);
+  if(consulFilter==='aprovado') list=allConsul.filter(c=>c.aprovado);
+  const cols='190px 110px 1fr 120px 150px';
+  document.getElementById('consul-table').innerHTML=list.length?
+    `<div class="table-head" style="grid-template-columns:${cols}"><span>Nome</span><span>Status</span><span>Especialidades</span><span>Região</span><span>Ações</span></div>`+
+    list.map(c=>`<div class="trow" style="grid-template-columns:${cols}">
+      <div><div style="font-size:13px;font-weight:600">${c.name}</div><div style="font-size:11px;color:var(--silver)">${c.cert}</div></div>
+      <span><span class="badge ${c.aprovado?'approved':'pending'}">${c.aprovado?'✅ Ativo':'⏳ Pendente'}</span></span>
+      <span style="font-size:12px;color:var(--silver)">${c.spec}</span>
+      <span style="font-size:12px;color:var(--silver)">${c.region}</span>
+      <div class="action-btns">
+        ${!c.aprovado?`<button class="abtn approve" onclick="approveConsul(${c.id});event.stopPropagation()">Aprovar</button>`
+          :`<button class="abtn reject" onclick="revokeConsul(${c.id});event.stopPropagation()">Revogar</button>`}
+        <button class="abtn remove" onclick="removeConsul(${c.id});event.stopPropagation()">✕</button>
+      </div></div>`).join('')
+    :`<div class="empty-state"><span>🎓</span>Nenhum consultor encontrado</div>`;
+}
+async function approveConsul(id){
+  if(!confirm('Aprovar este consultor?'))return;
+  allConsul=allConsul.map(c=>c.id===id?{...c,aprovado:true}:c);
+  if(useSupa()) await sb.from('consultores').update({aprovado:true}).eq('id',id);
+  updateBadges();renderConsul();renderDashboard();
+}
+async function revokeConsul(id){
+  if(!confirm('Revogar aprovação?'))return;
+  allConsul=allConsul.map(c=>c.id===id?{...c,aprovado:false}:c);
+  if(useSupa()) await sb.from('consultores').update({aprovado:false}).eq('id',id);
+  updateBadges();renderConsul();renderDashboard();
+}
+async function removeConsul(id){
+  if(!confirm('Remover consultor?'))return;
+  allConsul=allConsul.filter(c=>c.id!==id);
+  if(useSupa()) await sb.from('consultores').delete().eq('id',id);
+  updateBadges();renderConsul();renderDashboard();
+}
+
+// ══ LEADS ════════════════════════════════════════════════════════════════
+function renderLeads(){
+  const cols='160px 1fr 130px 130px 110px 110px';
+  document.getElementById('leads-table').innerHTML=allLeads.length?
+    `<div class="table-head" style="grid-template-columns:${cols}"><span>Nome</span><span>E-mail</span><span>Telefone</span><span>Horário</span><span>Tema</span><span>Data</span></div>`+
+    allLeads.map(l=>`<div class="trow" style="grid-template-columns:${cols}">
+      <span style="font-size:13px;font-weight:600">${l.nome}</span>
+      <span style="font-size:12px;color:var(--silver)">${l.email}</span>
+      <span style="font-size:12px">${l.telefone}</span>
+      <span style="font-size:12px;color:var(--silver)">${l.horario}</span>
+      <span style="font-size:12px;color:var(--gold2)">${l.tema||'–'}</span>
+      <span style="font-size:11.5px;color:var(--silver)">${new Date(l.created_at).toLocaleDateString('pt-BR')}</span>
+    </div>`).join('')
+    :`<div class="empty-state"><span>📋</span>Nenhum lead ainda</div>`;
+}
+
+// ══ AUTO SYNC: when a new client registers on site, add to CRM ════════════
+// In production, Supabase realtime would handle this automatically.
+// The index.html already saves users to localStorage via:
+// localStorage.setItem('investia_clients', JSON.stringify([...existing, newUser]))
+// Admin panel reads same key as fallback when Supabase isn't configured.
+(function syncLocalClients(){
+  try{
+    const stored=JSON.parse(localStorage.getItem('investia_crm_clients')||'[]');
+    if(stored.length && !useSupa()){
+      stored.forEach(sc=>{
+        if(!allClients.find(c=>c.email===sc.email)){
+          allClients.push({...sc,status:sc.status||'novo',historico:sc.historico||[{evento:'Cadastro via site',data:sc.created_at,icon:'🌐'}]});
+        }
+      });
+    }
+  }catch(e){}
+})();
+</script>
+</body>
+</html>

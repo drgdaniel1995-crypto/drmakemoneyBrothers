@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>InvestIA · Análise de Investimentos</title>
+<style>
+:root{
+  --navy:#07101f;--navy2:#0d1829;--navy3:#162035;--navy4:#1e2d47;
+  --gold:#c9a84c;--gold2:#e3c06a;--silver:#8899b0;--light:#cdd8e8;--white:#f0f4fa;
+  --green:#2ecc71;--red:#e74c3c;--border:rgba(201,168,76,0.18);--card:rgba(255,255,255,0.03);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:var(--navy);color:var(--white);}
+
+/* ── LANDING ── */
+#landing{
+  position:fixed;inset:0;z-index:10;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  background:radial-gradient(ellipse 60% 80% at 15% 50%,rgba(201,168,76,0.07) 0%,transparent 70%),
+             linear-gradient(160deg,#07101f 0%,#0b1525 60%,#07101f 100%);
+  overflow-y:auto;padding:24px;
+}
+.land-inner{display:grid;grid-template-columns:1fr 460px;max-width:1100px;width:100%;gap:60px;align-items:center;}
+.brand-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,168,76,0.09);
+  border:1px solid var(--border);padding:5px 14px;border-radius:100px;font-size:11px;
+  color:var(--gold2);letter-spacing:.1em;text-transform:uppercase;font-weight:500;margin-bottom:24px;}
+.brand-badge i{width:6px;height:6px;border-radius:50%;background:var(--green);}
+.brand-h1{font-family:Georgia,serif;font-size:clamp(32px,3.5vw,52px);line-height:1.1;margin-bottom:16px;}
+.brand-h1 span{color:var(--gold);}
+.brand-p{font-size:15px;color:var(--silver);line-height:1.75;max-width:400px;margin-bottom:28px;}
+.feats{display:flex;flex-direction:column;gap:11px;margin-bottom:28px;}
+.feat{display:flex;align-items:center;gap:12px;font-size:13.5px;color:var(--light);}
+.feat-ic{width:32px;height:32px;border-radius:8px;background:rgba(201,168,76,0.1);
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.disc{font-size:10.5px;color:var(--silver);opacity:.5;line-height:1.6;border-top:1px solid var(--border);padding-top:14px;}
+
+/* FORM CARD */
+.fcard{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:20px;
+  padding:36px;position:relative;overflow:hidden;
+  box-shadow:0 30px 70px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.05);}
+.fcard::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.fcard-title{font-family:Georgia,serif;font-size:22px;margin-bottom:4px;}
+.fcard-sub{font-size:13px;color:var(--silver);margin-bottom:24px;}
+.field{margin-bottom:15px;}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--gold2);
+  letter-spacing:.07em;text-transform:uppercase;margin-bottom:6px;}
+.field input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:10px;padding:13px 15px;font-size:14px;color:var(--white);
+  font-family:'Segoe UI',system-ui,sans-serif;outline:none;transition:border-color .2s;}
+.field input::placeholder{color:rgba(255,255,255,.28);}
+.field input:focus{border-color:var(--gold);}
+.field input.err{border-color:var(--red);}
+.ferr{font-size:11px;color:var(--red);margin-top:4px;display:none;}
+.field input.err + .ferr{display:block;}
+.cta{width:100%;padding:14px;border-radius:10px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  font-family:'Segoe UI',system-ui,sans-serif;font-size:15px;font-weight:600;
+  color:var(--navy);transition:opacity .2s;box-shadow:0 4px 22px rgba(201,168,76,.28);}
+.cta:hover{opacity:.88;}
+.priv{font-size:11px;color:var(--silver);text-align:center;margin-top:12px;opacity:.65;}
+.consul-link{text-align:center;margin-top:14px;font-size:12px;color:var(--silver);}
+.consul-link a{color:var(--gold2);text-decoration:none;}
+
+/* ── APP (começa escondido) ── */
+#app{
+  position:fixed;inset:0;z-index:5;
+  flex-direction:column;background:var(--navy2);
+  display:none;
+}
+
+/* TOPBAR */
+.topbar{background:var(--navy);border-bottom:1px solid var(--border);
+  padding:13px 24px;display:flex;align-items:center;gap:14px;flex-shrink:0;
+  box-shadow:0 2px 24px rgba(0,0,0,.4);position:relative;z-index:2;}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.agent-av{width:42px;height:42px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--gold),var(--navy3));
+  border:2px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:18px;}
+.agent-name{font-family:Georgia,serif;font-size:15px;font-weight:600;flex:1;}
+.agent-status{font-size:11px;color:var(--green);}
+.uchip{background:var(--card);border:1px solid var(--border);padding:5px 13px;
+  border-radius:100px;font-size:12px;color:var(--gold2);}
+.nbtn{background:none;border:1px solid var(--border);border-radius:8px;
+  color:var(--silver);font-size:12px;padding:6px 11px;cursor:pointer;transition:all .2s;}
+.nbtn:hover{border-color:var(--gold);color:var(--gold2);}
+
+/* MESSAGES */
+#messages{
+  flex:1;overflow-y:auto;padding:20px 24px;
+  display:flex;flex-direction:column;gap:8px;
+  background:var(--navy2);
+}
+
+.mrow{display:flex;align-items:flex-end;gap:9px;max-width:760px;}
+.mrow.user{flex-direction:row-reverse;margin-left:auto;}
+.mrow.agent{margin-right:auto;}
+.mav{width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--gold),var(--navy3));
+  display:flex;align-items:center;justify-content:center;font-size:13px;
+  border:1px solid rgba(201,168,76,.4);}
+.bubble{padding:12px 15px;border-radius:16px;font-size:14px;line-height:1.65;
+  max-width:100%;word-break:break-word;}
+.mrow.agent .bubble{background:var(--navy3);border:1px solid var(--border);
+  border-bottom-left-radius:3px;color:var(--light);}
+.mrow.user .bubble{background:linear-gradient(135deg,var(--gold),#b8892a);
+  color:var(--navy);border-bottom-right-radius:3px;font-weight:500;}
+.btime{font-size:10px;opacity:.5;margin-top:5px;}
+.mrow.user .btime{text-align:right;}
+.sys{text-align:center;font-size:11px;color:var(--silver);opacity:.5;padding:2px 0;}
+
+/* FILE CHIP */
+.fchip{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:9px 12px;margin-bottom:8px;}
+
+/* TYPING */
+.tbubble{background:var(--navy3);border:1px solid var(--border);border-radius:16px;
+  border-bottom-left-radius:3px;padding:13px 17px;display:flex;gap:5px;align-items:center;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:bounce 1.2s infinite;}
+.dot:nth-child(2){animation-delay:.2s;}.dot:nth-child(3){animation-delay:.4s;}
+
+/* CONSULTANT CARD */
+.consul-block{background:linear-gradient(135deg,rgba(201,168,76,.07),rgba(22,32,53,.9));
+  border:1px solid var(--gold);border-radius:14px;padding:16px;margin-top:6px;}
+.consul-block h4{font-family:Georgia,serif;font-size:14px;color:var(--gold2);margin-bottom:10px;}
+.ccard{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:9px;
+  padding:12px;margin-bottom:7px;display:flex;align-items:center;gap:12px;}
+.ccard-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--navy4));
+  display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.ccard-name{font-size:13px;font-weight:600;}
+.ccard-spec{font-size:11px;color:var(--silver);margin-top:2px;}
+.ccard-btn{margin-left:auto;background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:var(--navy);border:none;border-radius:7px;padding:7px 12px;font-size:12px;
+  font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+
+/* FILE PREVIEW BAR */
+#fpBar{display:none;padding:6px 24px;}
+.fpInner{background:var(--navy3);border:1px solid var(--border);border-radius:9px;
+  padding:8px 13px;display:flex;align-items:center;gap:9px;}
+.fpInner span{font-size:12px;color:var(--light);flex:1;}
+.fpInner button{background:none;border:none;color:var(--silver);cursor:pointer;font-size:14px;}
+
+/* INPUT BAR */
+.ibar{background:var(--navy);border-top:1px solid var(--border);
+  padding:14px 24px;display:flex;gap:10px;align-items:flex-end;flex-shrink:0;}
+.ibtn{width:42px;height:42px;border-radius:11px;flex-shrink:0;
+  background:var(--card);border:1px solid var(--border);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--gold2);}
+.ibtn:hover{background:rgba(201,168,76,.1);border-color:var(--gold);}
+.twrap{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+  border-radius:13px;padding:11px 15px;transition:border-color .2s;}
+.twrap:focus-within{border-color:var(--gold);}
+textarea#ci{width:100%;background:none;border:none;outline:none;resize:none;
+  font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;color:var(--white);
+  line-height:1.5;max-height:110px;overflow-y:auto;}
+textarea#ci::placeholder{color:rgba(255,255,255,.3);}
+.sbtn{width:42px;height:42px;border-radius:11px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  border:none;cursor:pointer;font-size:18px;
+  box-shadow:0 4px 16px rgba(201,168,76,.28);}
+.sbtn:disabled{opacity:.35;cursor:default;}
+
+/* MODAL */
+.moverlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.72);
+  display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:var(--navy2);border:1px solid var(--gold);border-radius:18px;
+  padding:32px;max-width:420px;width:100%;position:relative;}
+.modal h3{font-family:Georgia,serif;font-size:20px;margin-bottom:6px;}
+.modal p{font-size:13px;color:var(--silver);margin-bottom:20px;line-height:1.6;}
+.mclose{position:absolute;top:14px;right:16px;background:none;border:none;
+  color:var(--silver);font-size:18px;cursor:pointer;}
+.mfield{margin-bottom:13px;}
+.mfield label{font-size:11px;color:var(--gold2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;display:block;margin-bottom:6px;}
+.mfield input,.mfield select{width:100%;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:11px 13px;
+  font-size:13px;color:var(--white);font-family:'Segoe UI',system-ui,sans-serif;outline:none;}
+.mfield select option{background:var(--navy2);}
+.macts{display:flex;gap:9px;margin-top:18px;}
+.mcancel{flex:1;background:none;border:1px solid var(--border);border-radius:9px;
+  color:var(--silver);padding:11px;cursor:pointer;font-size:13px;}
+.mconfirm{flex:2;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;
+  border-radius:9px;color:var(--navy);padding:11px;cursor:pointer;font-size:13px;font-weight:600;}
+.msuccess{text-align:center;padding:8px 0;}
+.msuccess .mcheck{font-size:48px;margin-bottom:10px;}
+.msuccess h3{font-family:Georgia,serif;color:var(--gold2);margin-bottom:6px;}
+.msuccess p{font-size:13px;color:var(--silver);line-height:1.6;}
+
+/* MARKDOWN */
+.bubble strong{font-weight:700;}
+.bubble em{font-style:italic;}
+.bubble ul{padding-left:16px;margin:4px 0;}
+.bubble li{margin:3px 0;}
+.bubble hr{border:none;border-top:1px solid var(--border);margin:8px 0;}
+
+@keyframes bounce{0%,60%,100%{transform:translateY(0);}30%{transform:translateY(-5px);}}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+@media(max-width:700px){
+  .land-inner{grid-template-columns:1fr;}
+  .brand-side{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ LANDING ══ -->
+<div id="landing">
+  <div class="land-inner">
+    <div class="brand-side">
+      <div class="brand-badge"><i></i> IA de Investimentos</div>
+      <h1 class="brand-h1">Invista com<br/><span>clareza</span> e<br/>confiança real.</h1>
+      <p class="brand-p">Envie qualquer recomendação de investimento. Nossa IA analisa riscos, retornos e conecta você com consultores certificados.</p>
+      <div class="feats">
+        <div class="feat"><div class="feat-ic">📄</div> Aceita PDF, planilhas, imagens e texto</div>
+        <div class="feat"><div class="feat-ic">🔍</div> Análise de risco com veredicto 0–10</div>
+        <div class="feat"><div class="feat-ic">🤝</div> Consultores independentes certificados</div>
+        <div class="feat"><div class="feat-ic">🔒</div> Dados protegidos e confidenciais</div>
+      </div>
+      <p class="disc">Este serviço tem fins educativos. Não constitui recomendação de investimento.</p>
+    </div>
+    <div class="fcard">
+      <h2 class="fcard-title">Acesse gratuitamente</h2>
+      <p class="fcard-sub">Preencha seus dados para iniciar</p>
+      <div class="field">
+        <label>Nome completo</label>
+        <input type="text" id="fn" placeholder="João Silva" autocomplete="name"/>
+        <div class="ferr">Informe seu nome completo.</div>
+      </div>
+      <div class="field">
+        <label>E-mail</label>
+        <input type="email" id="fe" placeholder="joao@email.com" autocomplete="email"/>
+        <div class="ferr">Informe um e-mail válido.</div>
+      </div>
+      <div class="field">
+        <label>WhatsApp / Telefone</label>
+        <input type="tel" id="fp" placeholder="(11) 99999-9999" autocomplete="tel"/>
+        <div class="ferr">Informe seu telefone.</div>
+      </div>
+      <button class="cta" onclick="handleAccess()">Iniciar análise gratuita →</button>
+      <p class="priv">🔒 Seus dados são tratados com total sigilo</p>
+      <div class="consul-link">É consultor? <a href="consultores.html">Cadastre-se aqui</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <div class="topbar">
+    <div class="agent-av">💼</div>
+    <div style="flex:1">
+      <div class="agent-name">Analista IA · InvestIA</div>
+      <div class="agent-status" id="agentStatus">● Online agora</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="uchip">👤 <span id="uname"></span></div>
+      <button class="nbtn" onclick="newSession()">⟳ Nova sessão</button>
+    </div>
+  </div>
+
+  <div id="messages"></div>
+
+  <div id="fpBar">
+    <div class="fpInner">
+      <span id="fpName">📎 arquivo</span>
+      <button onclick="clearFile()">✕</button>
+    </div>
+  </div>
+
+  <div class="ibar">
+    <button class="ibtn" title="Anexar" onclick="document.getElementById('fi').click()">📎</button>
+    <input type="file" id="fi" style="display:none" accept=".pdf,.txt,.csv,.xlsx,.doc,.docx,.jpg,.jpeg,.png,.webp" onchange="handleFile(event)"/>
+    <div class="twrap">
+      <textarea id="ci" rows="1" placeholder="Cole a recomendação, descreva o ativo ou faça uma pergunta…" onkeydown="onKey(event)" oninput="resize(this)"></textarea>
+    </div>
+    <button class="sbtn" id="sbtn" onclick="sendMsg()">➤</button>
+  </div>
+</div>
+
+<!-- ══ MODAL CONSULTOR ══ -->
+<div id="cModal" class="moverlay" style="display:none">
+  <div class="modal">
+    <button class="mclose" onclick="closeMod()">✕</button>
+    <div id="mForm">
+      <h3>Falar com <span id="mCName">Especialista</span></h3>
+      <p id="mCDesc">Um assessor certificado entrará em contato.</p>
+      <div class="mfield"><label>Melhor horário</label>
+        <select id="mTime"><option>Manhã (8h–12h)</option><option>Tarde (12h–18h)</option><option>Noite (18h–20h)</option></select></div>
+      <div class="mfield"><label>Tema (opcional)</label>
+        <input type="text" id="mTopic" placeholder="Ex: renda variável, FIIs…"/></div>
+      <div class="macts">
+        <button class="mcancel" onclick="closeMod()">Cancelar</button>
+        <button class="mconfirm" onclick="confirmContact()">📞 Confirmar contato</button>
+      </div>
+    </div>
+    <div id="mSuccess" class="msuccess" style="display:none">
+      <div class="mcheck">✅</div>
+      <h3>Agendado!</h3>
+      <p>O consultor entrará em contato pelo WhatsApp cadastrado.</p>
+      <button class="cta" style="margin-top:16px;max-width:160px" onclick="closeMod()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────
+const SUPA_URL = 'https://uxkqfiypizyaqanwmsyt.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV4a3FmaXlwaXp5YXFhbndtc3l0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNjg5MjUsImV4cCI6MjA5Njk0NDkyNX0.baZkmN0LksceTdtvWs3l_ULKv5MahrPRxW3bMr2j8lc';
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+var user = {}, chatHistory = [], pending = null, msgCount = 0, ctaSent = false;
+
+// ── SYSTEM PROMPT ─────────────────────────────────────────────────────────
+var SYSTEM = 'Você é um analista sênior de investimentos brasileiro da plataforma InvestIA. Sua missão:\n\n1. Analisar criticamente recomendações de investimentos enviadas pelo usuário\n2. Estruturar análises com: resumo, pontos positivos, riscos, veredicto (nota 1-10)\n3. Fazer perguntas sobre perfil de risco, horizonte e objetivos quando necessário\n4. Comparar com benchmarks: CDI, IPCA+, Selic, Tesouro Direto\n5. Alertar sobre riscos ocultos, taxas abusivas e conflitos de interesse\n\nUse o nome do usuário para personalizar. Responda em português do Brasil com formatação clara usando **negrito** e listas. Seja direto e técnico mas acessível.\n\nQuando analisar um documento, use este formato:\n📋 **ANÁLISE: [nome do ativo]**\n[resumo]\n\n✅ **Pontos Positivos**\n• ...\n\n⚠️ **Pontos de Atenção**\n• ...\n\n🚨 **Riscos**\n• ...\n\n📊 **Veredicto: X/10**\n[justificativa]\n\nApós análises completas, inclua ao final: [SUGERIR_CONSULTOR]';
+
+// ── PHONE MASK ────────────────────────────────────────────────────────────
+document.getElementById('fp').addEventListener('input', function(){
+  var v = this.value.replace(/\D/g,'').slice(0,11);
+  if(v.length > 6) v = '(' + v.slice(0,2) + ') ' + v.slice(2,7) + '-' + v.slice(7);
+  else if(v.length > 2) v = '(' + v.slice(0,2) + ') ' + v.slice(2);
+  else if(v.length) v = '(' + v;
+  this.value = v;
+});
+document.getElementById('fp').addEventListener('keydown', function(e){ if(e.key==='Enter') handleAccess(); });
+document.getElementById('fn').addEventListener('keydown', function(e){ if(e.key==='Enter') document.getElementById('fe').focus(); });
+document.getElementById('fe').addEventListener('keydown', function(e){ if(e.key==='Enter') document.getElementById('fp').focus(); });
+
+// ── ACCESS ────────────────────────────────────────────────────────────────
+function handleAccess() {
+  var n = document.getElementById('fn').value.trim();
+  var e = document.getElementById('fe').value.trim();
+  var p = document.getElementById('fp').value.trim();
+
+  var ok = true;
+  if(n.length < 3){ document.getElementById('fn').classList.add('err'); ok=false; }
+  else document.getElementById('fn').classList.remove('err');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){ document.getElementById('fe').classList.add('err'); ok=false; }
+  else document.getElementById('fe').classList.remove('err');
+  if(p.replace(/\D/g,'').length < 10){ document.getElementById('fp').classList.add('err'); ok=false; }
+  else document.getElementById('fp').classList.remove('err');
+  if(!ok) return;
+
+  user = {name:n, email:e, phone:p};
+
+  // Esconde landing
+  document.getElementById('landing').style.display = 'none';
+
+  // Mostra app
+  var app = document.getElementById('app');
+  app.style.display = 'flex';
+  app.style.flexDirection = 'column';
+  app.style.position = 'fixed';
+  app.style.inset = '0';
+  app.style.zIndex = '5';
+  app.style.background = '#0d1829';
+
+  document.getElementById('uname').textContent = n.split(' ')[0];
+
+  setTimeout(function(){
+    sysMsg('Sessão iniciada · Análises processadas com segurança');
+    addMsg('agent', 'Olá, **' + n.split(' ')[0] + '**! 👋 Bem-vindo(a) à InvestIA.\n\nEstou aqui para analisar qualquer recomendação de investimento que você receber — de corretoras, assessores ou redes sociais.\n\nVocê pode:\n📄 **Enviar um documento** (PDF, planilha, imagem)\n💬 **Colar o texto** da recomendação recebida\n🔍 **Descrever o investimento** com suas palavras\n\n*O que você recebeu ou gostaria de analisar?*', null);
+  }, 80);
+
+  // Salva no CRM em background
+  saveCRM(n, e, p);
+}
+
+// ── MESSAGES ──────────────────────────────────────────────────────────────
+function getTime(){ return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+function getBox(){ return document.getElementById('messages'); }
+function scrollBot(){ var b=getBox(); b.scrollTop=b.scrollHeight; }
+
+function sysMsg(t){
+  var d=document.createElement('div'); d.className='sys'; d.textContent=t;
+  getBox().appendChild(d); scrollBot();
+}
+
+function md(t){
+  return t
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/^• (.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>[\s\S]*?<\/li>)/g,'<ul>$1</ul>')
+    .replace(/^---$/gm,'<hr/>')
+    .replace(/\n/g,'<br/>');
+}
+
+function addMsg(role, text, file){
+  msgCount++;
+  var wrap = document.createElement('div');
+  wrap.className = 'mrow ' + role;
+
+  var inner = '';
+  if(file) inner += '<div class="fchip"><span style="font-size:20px">'+file.icon+'</span><div><div style="font-size:12.5px;font-weight:600">'+file.name+'</div><div style="font-size:11px;color:var(--silver)">'+file.sz+'</div></div></div>';
+  if(text) inner += md(text.replace('[SUGERIR_CONSULTOR]',''));
+  inner += '<div class="btime">'+getTime()+(role==='user'?' <span style="color:var(--gold)">✓✓</span>':'')+'</div>';
+
+  if(role==='agent'){
+    wrap.innerHTML = '<div class="mav">💼</div><div class="bubble">'+inner+'</div>';
+  } else {
+    wrap.innerHTML = '<div class="bubble">'+inner+'</div>';
+  }
+
+  getBox().appendChild(wrap); scrollBot();
+
+  if(role==='agent' && text && text.includes('[SUGERIR_CONSULTOR]') && !ctaSent){
+    ctaSent = true;
+    setTimeout(showConsultors, 800);
+  }
+}
+
+function addTyping(){
+  var w=document.createElement('div'); w.className='mrow agent'; w.id='typing';
+  w.innerHTML='<div class="mav">💼</div><div class="tbubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+  getBox().appendChild(w); scrollBot();
+}
+function removeTyping(){ var t=document.getElementById('typing'); if(t) t.remove(); }
+
+// ── CONSULTORS ────────────────────────────────────────────────────────────
+var DEMO_CONSULT = [
+  {id:1,name:'Ana Beatriz Costa',cert:'CFP® · CGA®',spec:'Renda Variável, FIIs',avatar:'👩‍💼',whatsapp:'5511999990001'},
+  {id:2,name:'Carlos Eduardo Lima',cert:'CEA® · CFP®',spec:'Renda Fixa, Previdência',avatar:'👨‍💼',whatsapp:'5521999990002'},
+  {id:3,name:'Fernanda Matos',cert:'CFP® · CNPI®',spec:'Ações, Análise Técnica',avatar:'👩‍💼',whatsapp:'5531999990003'},
+];
+
+async function showConsultors(){
+  var list = DEMO_CONSULT;
+  try {
+    var r = await fetch(SUPA_URL+'/rest/v1/consultores?aprovado=eq.true&limit=3',{
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY}
+    });
+    if(r.ok){ var d=await r.json(); if(d&&d.length) list=d; }
+  } catch(e){}
+
+  var wrap = document.createElement('div');
+  wrap.className = 'mrow agent';
+  var cards = list.map(function(c){
+    return '<div class="ccard"><div class="ccard-av">'+(c.avatar||'👤')+'</div><div style="flex:1"><div class="ccard-name">'+c.name+'</div><div class="ccard-spec">'+c.cert+' · '+(c.spec||'')+'</div></div><button class="ccard-btn" onclick="openMod(\''+c.name+'\',\''+c.spec+'\')">📞 Contato</button></div>';
+  }).join('');
+
+  wrap.innerHTML = '<div class="mav">💼</div><div class="bubble"><div class="consul-block"><h4>🤝 Consultores Independentes Certificados</h4>'+cards+'<p style="font-size:11px;color:var(--silver);margin-top:8px;opacity:.7">Todos verificados com certificação ativa CVM/ANBIMA.</p></div><div class="btime">'+getTime()+'</div></div>';
+  getBox().appendChild(wrap); scrollBot();
+}
+
+// ── FILE ──────────────────────────────────────────────────────────────────
+function handleFile(e){
+  var f=e.target.files[0]; if(!f) return;
+  var sz=Math.round(f.size/1024);
+  var ext=f.name.split('.').pop().toLowerCase();
+  var isImg=['jpg','jpeg','png','webp'].includes(ext);
+  var icon=ext==='pdf'?'📄':isImg?'🖼️':'📎';
+  pending={f:f,name:f.name,sz:sz+' KB',icon:icon,isImg:isImg,rawType:f.type};
+  document.getElementById('fpBar').style.display='block';
+  document.getElementById('fpName').textContent=icon+' '+f.name;
+  e.target.value='';
+}
+function clearFile(){ pending=null; document.getElementById('fpBar').style.display='none'; }
+
+// ── SEND ──────────────────────────────────────────────────────────────────
+async function sendMsg(){
+  var inp=document.getElementById('ci');
+  var txt=inp.value.trim();
+  if(!txt && !pending) return;
+
+  var pf=pending; var ut=txt;
+  inp.value=''; inp.style.height='auto'; clearFile();
+
+  document.getElementById('sbtn').disabled=true;
+  document.getElementById('agentStatus').textContent='● digitando…';
+  document.getElementById('agentStatus').style.color='var(--gold2)';
+
+  addMsg('user', ut||'', pf?{name:pf.name,sz:pf.sz,icon:pf.icon}:null);
+
+  var uc;
+  if(pf && pf.isImg){
+    var b64 = await toB64(pf.f);
+    uc = [{type:'image',source:{type:'base64',media_type:pf.rawType,data:b64.split(',')[1]}},{type:'text',text:ut||'Analise este documento de recomendação de investimento.'}];
+  } else if(pf){
+    var tx = await pf.f.text().catch(function(){ return '[Conteúdo não legível]'; });
+    uc = (ut?ut+'\n\n':'')+'[DOCUMENTO: '+pf.name+']\n\n'+tx.slice(0,8000);
+  } else {
+    uc = ut;
+  }
+
+  chatHistory.push({role:'user',content:uc});
+  addTyping();
+
+  try{
+    var resp = await fetch('/api/claude',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        system:SYSTEM,
+        messages:chatHistory
+      })
+    });
+    var data = await resp.json();
+    var reply = (data.content||[]).map(function(b){ return b.text||''; }).join('') || 'Erro ao processar. Tente novamente.';
+    chatHistory.push({role:'assistant',content:reply});
+    removeTyping();
+    addMsg('agent', reply, null);
+  } catch(err){
+    removeTyping();
+    addMsg('agent','⚠️ Erro de conexão com a IA. Verifique sua internet e tente novamente.',null);
+  }
+
+  document.getElementById('sbtn').disabled=false;
+  document.getElementById('agentStatus').textContent='● Online agora';
+  document.getElementById('agentStatus').style.color='var(--green)';
+}
+
+function toB64(f){ return new Promise(function(res,rej){ var r=new FileReader(); r.onload=function(){ res(r.result); }; r.onerror=rej; r.readAsDataURL(f); }); }
+function onKey(e){ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendMsg(); } }
+function resize(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,110)+'px'; }
+
+// ── MODAL ─────────────────────────────────────────────────────────────────
+function openMod(name,spec){
+  document.getElementById('mCName').textContent=name;
+  document.getElementById('mCDesc').textContent='Especialista em '+spec+'.';
+  document.getElementById('cModal').style.display='flex';
+  document.getElementById('mForm').style.display='block';
+  document.getElementById('mSuccess').style.display='none';
+}
+function closeMod(){ document.getElementById('cModal').style.display='none'; }
+function confirmContact(){
+  document.getElementById('mForm').style.display='none';
+  document.getElementById('mSuccess').style.display='block';
+}
+
+// ── NEW SESSION ───────────────────────────────────────────────────────────
+function newSession(){
+  if(!confirm('Iniciar nova sessão? O histórico será perdido.')) return;
+  chatHistory=[]; msgCount=0; ctaSent=false;
+  document.getElementById('messages').innerHTML='';
+  sysMsg('Nova sessão iniciada');
+  addMsg('agent','Olá novamente, **'+user.name.split(' ')[0]+'**! O que gostaria de analisar agora?',null);
+}
+
+// ── CRM SAVE ──────────────────────────────────────────────────────────────
+function saveCRM(nome, email, telefone){
+  var entry = {
+    nome:nome, email:email, telefone:telefone,
+    origem:'site', status:'novo', notas:'',
+    historico:[{evento:'Cadastro via site (IA)',data:new Date().toISOString(),icon:'🌐'}],
+    created_at:new Date().toISOString()
+  };
+  // localStorage fallback
+  try{
+    var stored = JSON.parse(localStorage.getItem('investia_crm_clients')||'[]');
+    if(!stored.find(function(c){ return c.email===email; })){
+      entry.id = Date.now();
+      stored.unshift(entry);
+      localStorage.setItem('investia_crm_clients', JSON.stringify(stored));
+    }
+  } catch(e){}
+  // Supabase em background
+  fetch(SUPA_URL+'/rest/v1/clientes_crm', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=minimal'},
+    body:JSON.stringify(entry)
+  }).catch(function(){});
+}
+</script>
+</body>
+</html>
